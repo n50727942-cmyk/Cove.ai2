@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && incoming().id == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    // Posts collection
+    match /posts/{postId} {
+      allow get: if isSignedIn() && isValidId(postId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(postId) && incoming().authorId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(postId) && (
+        existing().authorId == request.auth.uid ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['likesCount', 'commentsCount'])
+      );
+      allow delete: if isSignedIn() && isValidId(postId) && existing().authorId == request.auth.uid;
+    }
+
+    // Comments collection
+    match /comments/{commentId} {
+      allow get: if isSignedIn() && isValidId(commentId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(commentId) && incoming().authorId == request.auth.uid;
+      allow delete: if isSignedIn() && isValidId(commentId) && existing().authorId == request.auth.uid;
+    }
+
+    // Post likes collection
+    match /postLikes/{likeId} {
+      allow get: if isSignedIn() && isValidId(likeId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(likeId) && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() && isValidId(likeId) && existing().userId == request.auth.uid;
+    }
+
+    // Follows collection
+    match /follows/{followId} {
+      allow get: if isSignedIn() && isValidId(followId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(followId) && incoming().followerId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(followId) && (existing().followerId == request.auth.uid || existing().followingId == request.auth.uid);
+      allow delete: if isSignedIn() && isValidId(followId) && (existing().followerId == request.auth.uid || existing().followingId == request.auth.uid);
+    }
+
+    // Safety actions collection
+    match /safetyActions/{actionId} {
+      allow get: if isSignedIn() && isValidId(actionId) && resource.data.actorId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.actorId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(actionId) && incoming().actorId == request.auth.uid;
+      allow delete: if isSignedIn() && isValidId(actionId) && existing().actorId == request.auth.uid;
+    }
+
+    // Conversations collection
+    match /conversations/{conversationId} {
+      allow get: if isSignedIn() && isValidId(conversationId) && request.auth.uid in resource.data.participantIds;
+      allow list: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+      allow create: if isSignedIn() && isValidId(conversationId) && request.auth.uid in incoming().participantIds;
+      allow update: if isSignedIn() && isValidId(conversationId) && request.auth.uid in existing().participantIds;
+      allow delete: if false;
+    }
+
+    // Messages collection
+    match /messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(messageId) && incoming().senderId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(messageId) && (
+        existing().senderId == request.auth.uid ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['deliveryStatus'])
+      );
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "displayName": { "type": "string" },
+        "bio": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "isPrivate": { "type": "boolean" },
+        "hasCompletedOnboarding": { "type": "boolean" },
+        "isOnline": { "type": "boolean" },
+        "lastSeen": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "username", "displayName"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Feed post document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "authorId": { "type": "string" },
+        "content": { "type": "string" },
+        "audience": { "type": "string", "enum": ["public", "followers"] },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "authorId", "content", "audience", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Comment on a post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "postId", "authorId", "content", "createdAt"]
+    },
+    "PostLike": {
+      "title": "PostLike",
+      "description": "Like on a post",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["postId", "userId", "createdAt"]
+    },
+    "Follow": {
+      "title": "Follow",
+      "description": "Follow relationship",
+      "type": "object",
+      "properties": {
+        "followerId": { "type": "string" },
+        "followingId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["followerId", "followingId", "status", "createdAt"]
+    },
+    "SafetyAction": {
+      "title": "SafetyAction",
+      "description": "User block, mute or report safety action",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "actorId": { "type": "string" },
+        "targetId": { "type": "string" },
+        "actionType": { "type": "string", "enum": ["block", "mute", "report"] },
+        "reason": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "actorId", "targetId", "actionType", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Direct message thread",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "participantIds": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "participantIds", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Message in conversation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "content": { "type": "string" },
+        "deliveryStatus": { "type": "string", "enum": ["sent", "delivered", "read"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "conversationId", "senderId", "content", "deliveryStatus", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "User posts collection"
+    },
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments collection"
+    },
+    "/postLikes/{likeId}": {
+      "schema": "PostLike",
+      "description": "Post likes collection"
+    },
+    "/follows/{followId}": {
+      "schema": "Follow",
+      "description": "Follow relationship collection"
+    },
+    "/safetyActions/{actionId}": {
+      "schema": "SafetyAction",
+      "description": "Safety actions collection"
+    },
+    "/conversations/{conversationId}": {
+      "schema": "Conversation",
+      "description": "Conversations collection"
+    },
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Messages collection"
+    }
+  }
+}

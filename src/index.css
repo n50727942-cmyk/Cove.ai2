@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cove-primary: #2D5AFF;
+  --color-cove-secondary: #00D1B2;
+  --color-cove-accent: #FF7A5C;
+  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --primary: #2D5AFF;
+  --secondary: #00D1B2;
+  --accent: #FF7A5C;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display);
+}

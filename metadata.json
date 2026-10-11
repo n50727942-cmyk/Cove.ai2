@@ -1,0 +1,10 @@
+{
+  "name": " Cove.ai",
+  "description": "A secure, AI-integrated communication platform featuring real-time intelligence, location services, and verified user authentication.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
